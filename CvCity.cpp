@@ -12540,6 +12540,70 @@ bool CvCity::IsCanPurchase(bool bTestPurchaseCost, bool bTestTrainable, UnitType
 	return true;
 }
 
+#if defined(MOD_AI_SMART_ECONOMY_CAN_GOLD_PURCHASE)
+
+/// AMS: Check oout if can purchase based on Order.
+bool CvCity::IsCanGoldPurchase(OrderData* pOrder)
+{
+	UnitTypes eUnitType = NO_UNIT;
+	BuildingTypes eBuildingType = NO_BUILDING;
+	ProjectTypes eProjectType = NO_PROJECT;
+
+	switch(pOrder->eOrderType)
+	{
+		case ORDER_TRAIN:
+			eUnitType = ((UnitTypes)(pOrder->iData1));
+			break;
+
+		case ORDER_CONSTRUCT:
+			eBuildingType = ((BuildingTypes)(pOrder->iData1));
+			break;
+
+		case ORDER_CREATE:
+			eProjectType = ((ProjectTypes)(pOrder->iData1));
+			break;
+
+		default:
+			return false;
+	}
+
+	return IsCanPurchase(true, true, eUnitType, eBuildingType, eProjectType, YIELD_GOLD);
+}
+
+/// AMS: Purchase what is being built on a city.
+void CvCity::PurchaseCurrentOrder()
+{
+	UnitTypes eUnitType = NO_UNIT;
+	BuildingTypes eBuildingType = NO_BUILDING;
+	ProjectTypes eProjectType = NO_PROJECT;
+	OrderData* pOrder = getOrderFromQueue(0);
+
+	if (pOrder)
+	{
+		switch(pOrder->eOrderType)
+		{
+			case ORDER_TRAIN:
+				eUnitType = ((UnitTypes)(pOrder->iData1));
+				break;
+
+			case ORDER_CONSTRUCT:
+				eBuildingType = ((BuildingTypes)(pOrder->iData1));
+				break;
+
+			case ORDER_CREATE:
+				eProjectType = ((ProjectTypes)(pOrder->iData1));
+				break;
+
+			default:
+				return;
+		}
+	}
+
+	Purchase(eUnitType, eBuildingType, eProjectType, YIELD_GOLD);
+}
+
+#endif
+
 //	--------------------------------------------------------------------------------
 // purchase something at the city
 void CvCity::Purchase(UnitTypes eUnitType, BuildingTypes eBuildingType, ProjectTypes eProjectType, YieldTypes ePurchaseYield)

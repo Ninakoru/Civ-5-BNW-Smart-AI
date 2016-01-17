@@ -785,6 +785,9 @@ public:
 	int NearXQueuedAttacks(const CvPlot* pPlot, const int iRange);
 
 	// Public logging
+#if defined(MOD_AI_SMART_LOGS)
+	CvString tacticalLogString;
+#endif
 	void LogTacticalMessage(CvString& strMsg, bool bSkipLogDominanceZone = true);
 
 private:
@@ -897,6 +900,13 @@ private:
 	void ExecuteEscortEmbarkedMoves();
 
 	// Internal low-level utility routines
+#if defined(MOD_AI_SMART_SAME_PLOT_FOUND)
+	public: int SamePlotFound(vector<CvPlot*> plotData, CvPlot* plotXy);
+#endif
+#if defined (MOD_AI_SMART_GET_BEST_REPOSITION_PLOT)
+	void GetBestPlot(CvPlot*& outputPlot, vector<CvPlot*> plotsToCheck);
+	CvPlot* GetBestRepositionPlot(UnitHandle unitH, CvPlot* plotTarget);
+#endif
 	void TurnOffMove(TacticalAIMoveTypes eType);
 	bool FindUnitsForThisMove(TacticalAIMoveTypes eMove, CvPlot* pTargetPlot, int iNumTurnsAway=0, bool bRangedOnly=false);
 	bool FindUnitsWithinStrikingDistance(CvPlot *pTargetPlot, int iNumTurnsAway, int iPreferredDamageLevel, bool bNoRangedUnits=false, bool bNavalOnly=false, bool bMustMoveThrough=false, bool bIncludeBlockedUnits=false, bool bWillPillage=false, bool bTargetUndefended=false);
@@ -905,6 +915,9 @@ private:
 	bool FindClosestUnit(CvPlot* pTargetPlot, int iNumTurnsAway, bool bMustHaveHalfHP, bool bMustBeRangedUnit=false, int iRangeRequired=2, bool bNeedsIgnoreLOS=false, bool bMustBeMeleeUnit=false, bool bIgnoreUnits=false, CvPlot* pRangedAttackTarget=NULL);
 	bool FindClosestOperationUnit(CvPlot* pTargetPlot, bool bSafeForRanged, bool bMustBeRangedUnit);
 	bool FindClosestNavalOperationUnit(CvPlot* pTargetPlot, bool bEscortedUnits);
+#if defined(MOD_AI_SMART_FIND_AIR_UNITS_TO_AIR_SWEEP)
+	void FindAirUnitsToAirSweep(CvPlot* pTarget);
+#endif
 	int ComputeTotalExpectedDamage(CvTacticalTarget* target, CvPlot* pTargetPlot);
 	int ComputeTotalExpectedBombardDamage(UnitHandle pTarget);
 	bool IsExpectedToDamageWithRangedAttack(UnitHandle pAttacker, CvPlot* pTarget);
@@ -949,6 +962,9 @@ private:
 	CvPlayer* m_pPlayer;
 	CvTacticalAnalysisMap* m_pMap;
 	list<int> m_CurrentTurnUnits;
+#if defined(MOD_AI_SMART_CURRENT_AIR_UNITS_VECTOR)	
+	std::vector<CvTacticalUnit> m_CurrentAirUnits;
+#endif
 	std::vector<CvTacticalUnit> m_CurrentMoveUnits;
 	std::vector<CvTacticalUnit> m_CurrentMoveHighPriorityUnits;
 	std::vector<CvTacticalCity> m_CurrentMoveCities;

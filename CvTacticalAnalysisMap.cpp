@@ -725,8 +725,21 @@ void CvTacticalAnalysisMap::AddToDominanceZones(int iIndex, CvTacticalAnalysisCe
 				{
 					iStrength = pEnemyUnit->GetBaseCombatStrength(true);
 				}
+#if defined(MOD_CP_NOT_VISIBLE_UNITS_LESS_STRENGTH)
+				int iRangedStrength = pEnemyUnit->GetMaxRangedCombatStrength(NULL, /*pCity*/ NULL, true, true);
+
+				if (!pCell->IsVisible())
+				{
+					iStrength /= 2;
+					iRangedStrength /= 2;
+				}
+
+				pZone->AddEnemyStrength(iStrength * m_iUnitStrengthMultiplier);
+				pZone->AddEnemyRangedStrength(iRangedStrength * m_iUnitStrengthMultiplier);
+#else
 				pZone->AddEnemyStrength(iStrength * m_iUnitStrengthMultiplier);
 				pZone->AddEnemyRangedStrength(pEnemyUnit->GetMaxRangedCombatStrength(NULL, /*pCity*/ NULL, true, true));
+#endif				
 				pZone->AddEnemyUnitCount(1);
 				if(pEnemyUnit->isRanged())
 				{
@@ -773,12 +786,21 @@ void CvTacticalAnalysisMap::CalculateMilitaryStrengths()
 				if(pZone->GetTerritoryType() == TACTICAL_TERRITORY_FRIENDLY)
 				{
 					pZone->AddFriendlyStrength(iStrength);
+#if defined(MOD_CP_COUNT_ENEMY_CITY_ONLY_ENEMY_TERRITORY)
+					pZone->AddFriendlyRangedStrength(pClosestCity->getStrengthValue(true));
+				}
+				else if(pZone->GetTerritoryType() == TACTICAL_TERRITORY_ENEMY)
+				{
+					pZone->AddEnemyStrength(iStrength);
+					pZone->AddEnemyRangedStrength(pClosestCity->getStrengthValue(true));
+#else
 					pZone->AddFriendlyRangedStrength(pClosestCity->getStrengthValue());
 				}
 				else
 				{
 					pZone->AddEnemyStrength(iStrength);
 					pZone->AddEnemyRangedStrength(pClosestCity->getStrengthValue());
+#endif
 				}
 
 				// Loop through all of OUR units first
@@ -787,13 +809,21 @@ void CvTacticalAnalysisMap::CalculateMilitaryStrengths()
 					if(pLoopUnit->IsCombatUnit())
 					{
 						if(pLoopUnit->getDomainType() == DOMAIN_AIR ||
+#if defined(MOD_CP_COUNT_RANGED_DESPITE_DOMAIN)
+							//ranged power is cross-domain!
+							pLoopUnit->isRanged() ||
+#endif
 						        (pLoopUnit->getDomainType() == DOMAIN_LAND && !pZone->IsWater()) ||
 						        (pLoopUnit->getDomainType() == DOMAIN_SEA && pZone->IsWater()))
 						{
 							iDistance = plotDistance(pLoopUnit->getX(), pLoopUnit->getY(), pClosestCity->getX(), pClosestCity->getY());
 							if (iDistance <= m_iTacticalRange)
 							{
+#if defined(MOD_CP_DISCOUNT_DISTANCE_AT_4_RANGE)
+								iMultiplier = m_iTacticalRange + MIN(4 - iDistance, 0);
+#else
 								iMultiplier = (m_iTacticalRange + 4 - iDistance);  // "4" so unit strength isn't totally dominated by proximity to city
+#endif
 								if(iMultiplier > 0)
 								{
 									int iUnitStrength = pLoopUnit->GetBaseCombatStrengthConsideringDamage();
@@ -833,6 +863,10 @@ void CvTacticalAnalysisMap::CalculateMilitaryStrengths()
 							if(pLoopUnit->IsCombatUnit())
 							{
 								if(pLoopUnit->getDomainType() == DOMAIN_AIR ||
+#if defined(MOD_CP_COUNT_RANGED_DESPITE_DOMAIN)
+										//ranged power is cross-domain!
+										pLoopUnit->isRanged() ||
+#endif
 								        (pLoopUnit->getDomainType() == DOMAIN_LAND && !pZone->IsWater()) ||
 								        (pLoopUnit->getDomainType() == DOMAIN_SEA && pZone->IsWater()))
 								{
@@ -844,7 +878,11 @@ void CvTacticalAnalysisMap::CalculateMilitaryStrengths()
 										iDistance = plotDistance(pLoopUnit->getX(), pLoopUnit->getY(), pClosestCity->getX(), pClosestCity->getY());
 										if (iDistance <= m_iTacticalRange)
 										{
+#if defined(MOD_CP_DISCOUNT_DISTANCE_AT_4_RANGE)
+											iMultiplier = m_iTacticalRange + MIN(4 - iDistance, 0);  // 4 because action may still be spread out over the zone
+#else
 											iMultiplier = (m_iTacticalRange + 4 - iDistance);  // "4" so unit strength isn't totally dominated by proximity to city
+#endif
 											if(!pPlot->isVisible(eTeam) && !pPlot->isAdjacentVisible(eTeam, false))
 											{
 												bVisible = false;

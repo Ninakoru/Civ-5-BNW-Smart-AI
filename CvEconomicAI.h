@@ -230,6 +230,9 @@ private:
 	void DoAntiquitySites();
 	void DisbandExtraWorkers();
 	void DisbandExtraArchaeologists();
+#if defined(MOD_AI_SMART_DISBAND_LONG_OBSOLETE_UNITS)
+	void DisbandLongObsoleteUnits();
+#endif
 
 	// Low-level utility functions
 	void AssignExplorersToHuts();

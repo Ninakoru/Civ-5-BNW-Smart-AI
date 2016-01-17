@@ -933,7 +933,12 @@ GreatPeopleDirectiveTypes CvPlayerAI::GetDirectiveWriter(CvUnit* pGreatWriter)
 	{
 		eDirective = GREAT_PEOPLE_DIRECTIVE_USE_POWER;
 	}
+#if defined(MOD_AI_SMART_GREAT_WRITER_WAIT_TO_CONSUME)
+	// AMS: Wait iddle for 6 turns until culture blast due to no alternatives, maybe a work slot is built/conquered meanwhile.
+	else if ((GC.getGame().getGameTurn() - pGreatWriter->getGameTurnCreated()) >= (GC.getAI_HOMELAND_GREAT_PERSON_TURNS_TO_WAIT() / 2))
+#else
 	else
+#endif
 	{
 		eDirective = GREAT_PEOPLE_DIRECTIVE_CULTURE_BLAST;
 	}
@@ -970,7 +975,12 @@ GreatPeopleDirectiveTypes CvPlayerAI::GetDirectiveArtist(CvUnit* pGreatArtist)
 	}
 
 	// If Brazil and we're closing in on Culture Victory
+#if defined(MOD_AI_SMART_GREAT_ARTIST_BRAZIL_TWEAK)
+	int iInfluentialOn = (GC.getGame().GetGameCulture()->GetNumCivsInfluentialForWin() / 4);
+	if (eDirective == NO_GREAT_PEOPLE_DIRECTIVE_TYPE && GetPlayerTraits()->GetGoldenAgeTourismModifier() > 0 && GetCulture()->GetNumCivsInfluentialOn() > iInfluentialOn)
+#else
 	if (eDirective == NO_GREAT_PEOPLE_DIRECTIVE_TYPE && GetPlayerTraits()->GetGoldenAgeTourismModifier() > 0 && GetCulture()->GetNumCivsInfluentialOn() > 0)
+#endif
 	{
 		eDirective = GREAT_PEOPLE_DIRECTIVE_GOLDEN_AGE;
 	}
@@ -982,7 +992,11 @@ GreatPeopleDirectiveTypes CvPlayerAI::GetDirectiveArtist(CvUnit* pGreatArtist)
 		eDirective = GREAT_PEOPLE_DIRECTIVE_USE_POWER;
 	}
 
+#if defined(MOD_AI_SMART_GREAT_ARTIST_WAIT_TO_CONSUME)
+	if (eDirective == NO_GREAT_PEOPLE_DIRECTIVE_TYPE && !isGoldenAge() && ((GC.getGame().getGameTurn() - pGreatArtist->getGameTurnCreated()) >= (GC.getAI_HOMELAND_GREAT_PERSON_TURNS_TO_WAIT() / 2)))
+#else
 	if (eDirective == NO_GREAT_PEOPLE_DIRECTIVE_TYPE && !isGoldenAge())
+#endif
 	{
 		eDirective = GREAT_PEOPLE_DIRECTIVE_GOLDEN_AGE;
 	}
@@ -1016,7 +1030,11 @@ GreatPeopleDirectiveTypes CvPlayerAI::GetDirectiveMusician(CvUnit* pGreatMusicia
 	{
 		eDirective = GREAT_PEOPLE_DIRECTIVE_USE_POWER;
 	}
+#if defined(MOD_AI_SMART_GREAT_MUSICIAN_WAIT_TO_CONSUME)
+	else if ((GC.getGame().getGameTurn() - pGreatMusician->getGameTurnCreated()) >= (GC.getAI_HOMELAND_GREAT_PERSON_TURNS_TO_WAIT() / 2))
+#else
 	else
+#endif
 	{
 		CvPlot* pTarget = FindBestMusicianTargetPlot(pGreatMusician, true);
 		if(pTarget)
@@ -1075,9 +1093,16 @@ GreatPeopleDirectiveTypes CvPlayerAI::GetDirectiveMerchant(CvUnit* pGreatMerchan
 		return NO_GREAT_PEOPLE_DIRECTIVE_TYPE;
 	}
 
+#if defined(MOD_AI_SMART_GREAT_MERCHANT_CUSTOMS_HOUSE_FIRST_QUARTER)
+	// Create improvement only for first quarter of the game, and not with venice powers. 
+	if (eDirective == NO_GREAT_PEOPLE_DIRECTIVE_TYPE && GC.getGame().getGameTurn() <= ((GC.getGame().getEstimateEndTurn() * 1) / 4))
+	{
+		if (!bTheVeniceException)
+#else
 	if (eDirective == NO_GREAT_PEOPLE_DIRECTIVE_TYPE && GC.getGame().getGameTurn() <= ((GC.getGame().getEstimateEndTurn() * 2) / 4))
 	{
 		if (GetDiplomacyAI()->IsGoingForDiploVictory() && !bTheVeniceException)
+#endif
 		{
 			eDirective = GREAT_PEOPLE_DIRECTIVE_CONSTRUCT_IMPROVEMENT;
 		}
@@ -1111,12 +1136,19 @@ GreatPeopleDirectiveTypes CvPlayerAI::GetDirectiveScientist(CvUnit* /*pGreatScie
 		eDirective = GREAT_PEOPLE_DIRECTIVE_USE_POWER;
 	}
 
+#if defined(MOD_AI_SMART_GREAT_SCIENTIST_ACADEMY_FIRST_THIRD)
+	// Go for improvement for third part of estimated game, no matter what.
+	if(eDirective == NO_GREAT_PEOPLE_DIRECTIVE_TYPE && GC.getGame().getGameTurn() <= ((GC.getGame().getEstimateEndTurn() * 1) / 3))
+	{
+		eDirective = GREAT_PEOPLE_DIRECTIVE_CONSTRUCT_IMPROVEMENT;
+#else
 	if(eDirective == NO_GREAT_PEOPLE_DIRECTIVE_TYPE && GC.getGame().getGameTurn() <= ((GC.getGame().getEstimateEndTurn() * 1) / 4))
 	{
 		if(GetDiplomacyAI()->IsGoingForSpaceshipVictory())
 		{
 			eDirective = GREAT_PEOPLE_DIRECTIVE_CONSTRUCT_IMPROVEMENT;
 		}
+#endif
 	}
 
 	if (eDirective == NO_GREAT_PEOPLE_DIRECTIVE_TYPE)

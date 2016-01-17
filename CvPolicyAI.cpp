@@ -231,6 +231,13 @@ int CvPolicyAI::ChooseNextPolicy(CvPlayer* pPlayer)
 
 						iBranchWeight *= (100 - m_iPolicyWeightPercentDropNewBranch);
 						iBranchWeight /= 100;
+#if defined(MOD_AI_SMART_POLICY_CHOICE_ANCIENT_POLICIES_LESS_VALUE)
+						if (!pPlayer->GetPlayerPolicies()->IsEraPrereqBranch(ePolicyBranch))
+						{
+							iBranchWeight *= 80;
+							iBranchWeight /= 100;
+						}
+#endif
 						if(eCurrentGrandStrategy == eCultureGrandStrategy)
 						{
 							iBranchWeight /= 3;

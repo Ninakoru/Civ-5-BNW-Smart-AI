@@ -745,6 +745,10 @@ public:
 
 	bool CanPlaceUnitHere(UnitTypes eUnitType);
 	bool IsCanPurchase(bool bTestPurchaseCost, bool bTestTrainable, UnitTypes eUnitType, BuildingTypes eBuildingType, ProjectTypes eProjectType, YieldTypes ePurchaseYield);
+#if defined(MOD_AI_SMART_ECONOMY_CAN_GOLD_PURCHASE)	
+	bool IsCanGoldPurchase(OrderData* pOrder);
+	void PurchaseCurrentOrder();
+#endif	
 	void Purchase(UnitTypes eUnitType, BuildingTypes eBuildingType, ProjectTypes eProjectType, YieldTypes ePurchaseYield);
 
 	PlayerTypes getLiberationPlayer() const;

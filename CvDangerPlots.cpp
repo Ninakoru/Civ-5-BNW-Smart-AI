@@ -148,7 +148,11 @@ void CvDangerPlots::UpdateDanger(bool bPretendWarWithAllCivs, bool bIgnoreVisibi
 						continue;
 					}
 
+#if defined(MOD_AI_SMART_ASSIGN_DANGER)
+					if(!pLoopUnit->canMoveOrAttackInto(*pLoopPlot) && !pLoopUnit->canRangeStrike())
+#else
 					if(!pLoopUnit->canMoveOrAttackInto(*pLoopPlot) && !pLoopUnit->canRangeStrikeAt(pLoopPlot->getX(),pLoopPlot->getY()))
+#endif
 					{
 						continue;
 					}
@@ -593,6 +597,9 @@ bool CvDangerPlots::ShouldIgnoreCitadel(CvPlot* pCitadelPlot, bool bIgnoreVisibi
 void CvDangerPlots::AssignUnitDangerValue(CvUnit* pUnit, CvPlot* pPlot)
 {
 	// MAJIK NUMBARS TO MOVE TO XML
+#if defined(MOD_AI_SMART_ASSIGN_DANGER)
+	int iTurnsAway = 0;
+#endif
 	int iCombatValueCalc = 100;
 	int iBaseUnitCombatValue = pUnit->GetBaseCombatStrengthConsideringDamage() * iCombatValueCalc;
 	// Combat capable?  If not, the calculations will always result in 0, so just skip it.
@@ -610,6 +617,40 @@ void CvDangerPlots::AssignUnitDangerValue(CvUnit* pUnit, CvPlot* pPlot)
 
 			int iPlotX = pPlot->getX();
 			int iPlotY = pPlot->getY();
+#if defined(MOD_AI_SMART_ASSIGN_DANGER)
+			int pDistance = plotDistance(pUnit->getX(), pUnit->getY(), iPlotX, iPlotY);
+			// Lest substract distance, will not greatly affect danger but will give distant = safer position.
+			iBaseUnitCombatValue -= pDistance;
+			//AMS: Is a ranged unit?
+			if (pUnit->canRangeStrike())
+			{
+				// Plot is in range and can strike from current position
+				if( pDistance <= pUnit->GetRange() && pUnit->canRangeStrikeAt(pPlot->getX(),pPlot->getY()))
+				{
+					iTurnsAway = 1;
+					CvString strMsg;
+				}
+				else if(pDistance < pUnit->GetRangePlusMoveToshot())
+				{
+					// Lest check if unit can move and strike from a number of positions.
+					std::vector<CvPlot*> movePlotList;
+					pUnit -> GetMovablePlotListOpt(movePlotList, pPlot, false);
+					if (!movePlotList.empty())
+					{
+						// Just give half danger if only one position found, else full danger.
+						int moveProb = 3 - movePlotList.size();
+						iTurnsAway = max(1, moveProb);
+					}
+				}
+				if (iTurnsAway == 0)
+				{
+					return;
+				}
+			}
+
+			if (iTurnsAway == 0)
+			{
+#endif
 			// can the unit actually walk there
 			if(!kPathFinder.GeneratePath(pUnit->getX(), pUnit->getY(), iPlotX, iPlotY, 0, true /*bReuse*/))
 			{
@@ -617,8 +658,14 @@ void CvDangerPlots::AssignUnitDangerValue(CvUnit* pUnit, CvPlot* pPlot)
 			}
 
 			CvAStarNode* pNode = kPathFinder.GetLastNode();
+#if defined(MOD_AI_SMART_ASSIGN_DANGER)
+			iTurnsAway = pNode->m_iData2;
+			iTurnsAway = max(iTurnsAway, 1);
+			}
+#else
 			int iTurnsAway = pNode->m_iData2;
 			iTurnsAway = max(iTurnsAway, 1);
+#endif
 
 			int iUnitCombatValue = iBaseUnitCombatValue / iTurnsAway;
 			iUnitCombatValue = ModifyDangerByRelationship(pUnit->getOwner(), pPlot, iUnitCombatValue);
