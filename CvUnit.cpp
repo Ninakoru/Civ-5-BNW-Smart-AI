@@ -20795,12 +20795,12 @@ int CvUnit::AI_promotionValue(PromotionTypes ePromotion)
 		iValue = GetPromotionValue(pkPromotionInfo->GetAttackMod(), getDomainType() == DOMAIN_SEA ? 1 : 0, iFlavorMobile, mediumPriority);
 	}
 
-	// Low priority promotions
-
 	if (iValue == 0)
 	{
-		iValue = GetPromotionValue(pkPromotionInfo->GetRangedDefenseMod(), getExtraRangedDefenseModifier(), iFlavorDefense, lowPriority);
+		iValue = GetPromotionValue(pkPromotionInfo->GetRangedDefenseMod(), getExtraRangedDefenseModifier(), iFlavorDefense, mediumPriority);
 	}
+
+	// Low priority promotions
 
 	if (iValue == 0)
 	{

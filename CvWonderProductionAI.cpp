@@ -246,7 +246,11 @@ BuildingTypes CvWonderProductionAI::ChooseWonder(bool bUseAsyncRandom, bool bAdj
 			const CvBuildingClassInfo& kBuildingClassInfo = kBuilding.GetBuildingClassInfo();
 
 			// Make sure this wonder can be built now
+#if defined(MOD_AI_SMART_EXCLUDE_NATIONAL_WONDERS_DESIRED_WONDERS)
+			if(IsWonderNotNationalUnique(kBuilding) && HaveCityToBuild((BuildingTypes)iBldgLoop))
+#else
 			if(IsWonder(kBuilding) && HaveCityToBuild((BuildingTypes)iBldgLoop))
+#endif
 			{
 				iTurnsRequired = std::max(1, kBuilding.GetProductionCost() / iEstimatedProductionPerTurn);
 
@@ -554,6 +558,22 @@ bool CvWonderProductionAI::IsWonder(const CvBuildingEntry& kBuilding) const
 	}
 	return false;
 }
+
+#if defined(MOD_AI_SMART_EXCLUDE_NATIONAL_WONDERS_DESIRED_WONDERS)
+/// Check wonders excluding national wonders you can only have one of.
+bool CvWonderProductionAI::IsWonderNotNationalUnique(const CvBuildingEntry& kBuilding) const
+{
+	const CvBuildingClassInfo& kBuildingClass = kBuilding.GetBuildingClassInfo();
+
+	bool isNationalUnique = kBuildingClass.getMaxPlayerInstances() == 1;
+
+	if((::isWorldWonderClass(kBuildingClass) || ::isTeamWonderClass(kBuildingClass) || ::isNationalWonderClass(kBuildingClass)) && !isNationalUnique)
+	{
+		return true;
+	}
+	return false;
+}
+#endif
 
 // PRIVATE METHODS
 

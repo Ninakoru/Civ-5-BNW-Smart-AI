@@ -24,13 +24,6 @@
 // Great scientist creates academy only for first third of the game. 
 #define MOD_AI_SMART_GREAT_SCIENTIST_ACADEMY_FIRST_THIRD (true)
 
-// CvGrandStrategyAI
-//-------------------
-// Lowers the culture priority part that's based on era.
-#define MOD_AI_SMART_GRAND_STRATEGY_CULTURE_LESS_PRIORITY (true)
-// Rises the science priority part that's based on era, adjusts priority boost from apollo project.
-#define MOD_AI_SMART_GRAND_STRATEGY_SCIENCE_MORE_PRIORITY (true)
-
 // CvPolicyClasses
 //-----------------
 // Ignore grand strategy flavor modifications until medieval era.
@@ -52,6 +45,8 @@
 //--------------
 // AI stops building archaeologists if has more than 4x the number of sites.
 #define MOD_AI_SMART_ARCHAEOLOGISTS_SITES_RATIO (true)
+// Checking for culture at expansionism is no longer needed due to culture vic conditions changed.
+#define MOD_AUI_FIX_EXPAND_LIKE_CRAZY_REMOVE_CULTURE_CHECK
 
 // CvHomelandAI
 //--------------
@@ -61,6 +56,8 @@
 #define MOD_AI_SMART_AIR_UPGRADE_TRICK (true)
 // Fix to allow upgrades on units in army but not moving or at destination.
 #define MOD_AI_SMART_UPGRADE_IN_WAITING_ARMY_FIX (true)
+// Allow to upgrade more units based of total number of units that can be upgraded.
+#define MOD_AI_SMART_MORE_UPGRADES_PER_TURN (true)
 // Units do not heal outside friendly territory at less than 50% max health if they're at danger.
 #define MOD_AI_SMART_HEALING_UPGRADE (true)
 // Units will flee if health is less than 30%.
@@ -89,6 +86,38 @@
 #ifdef MOD_AI_SMART_ECONOMY_HURRY_PRODUCTION_REACTIVATED
 #define MOD_AI_SMART_ECONOMY_CAN_GOLD_PURCHASE (true)
 #endif
+
+// CvCityStrategyAI
+//------------------
+// Puppet cities can build training buildings, as they could get other bosuses from policies.
+#define MOD_AI_SMART_PUPPET_TRAINING_BUILDINGS (true)
+// Check out gainst all cities if current city could get the most benefit for buildings you can only have one of.
+#define MOD_AI_SMART_WONDER_SANITY_CHECK (true)
+// Quickens how fast the AI will critically ask for settler based also on difficulty and game speed properties.
+#define MOD_AI_SMART_FASTER_CAPITAL_SETTLER_NEED_BY_DIFFICULTY_SPEED (true)
+// Takes into account owned tiles vs worked tiles for estimated workers needed.
+#define MOD_AI_SMART_FLEXIBLE_NEED_TILE_IMPROVERS (true)
+// Greatly boost combat unit production if player has a very low count of combat units, starting at turn 11.
+#define MOD_AI_CORE_UNITS_WEIGHT_BOOST (true)
+
+// CvUnitProductionAI
+//--------------------
+// Utility function to ckeck out unit cuantity vs minimum reserve units, boosting values if difference is too high.
+#ifdef MOD_AI_CORE_UNITS_WEIGHT_BOOST
+#define MOD_AI_GET_UNIT_WEIGHT_REVISED (true)
+#endif
+
+// CvCityAI
+//----------
+// Check out city expansion flavor and city production vs empire production, to avoid locking a civ building a wonder directly too early.
+#define MOD_AI_SMART_CHOOSE_SKIP_DIRECT_WONDERS (true)
+
+
+// CvWonderProductionAI
+//----------------------
+// Exclude national wonders you can only have one of on desired wonder checks
+#define MOD_AI_SMART_EXCLUDE_NATIONAL_WONDERS_DESIRED_WONDERS (true)
+
 
 // CvTacticalAI
 //--------------
@@ -139,7 +168,27 @@
 // Added plot distance in the FindClosestUnit function, so it will be sorted first by turns to target, next by distance.
 #define MOD_AI_SMART_FIND_CLOSEST_UNIT (true) 
 // Reworked ExecuteFlankAttack function to assign moving units around target scored by possible units to reach in turn.
-#define MOD_AI_SMART_EXECUTE_FLANK_ATTACK (true) 
+#define MOD_AI_SMART_EXECUTE_FLANK_ATTACK (true)
+// Check set tactical posisition frontline if the ranged unit has 1 range (machine guns)
+#define MOD_AUI_CLOSE_ON_TARGET_MELEE_RANGE (true)
+// When checking the embark safety of a plot, use the plot the unit will be moving to instead of the target plot
+#define MOD_AUI_FIX_MOVE_TO_USING_SAFE_EMBARK_CORRECT_PLOT (true)
+// Add the possibility to shoot after moving for safe and protected bombards.
+#define MOD_AUI_FIX_SAFE_BOMBARDS_MOVE_AND_SHOOT (true)
+// Cities with a garrisoned unit now use the city's data instead of the garrisoned unit's data
+#define MOD_AUI_FIX_SAFE_BOMBARDS_CITIES_WITH_GARRISON (true)
+// Only set unit as processed if save moves is not set.
+#define MOD_AUI_FIX_EXECUTE_MOVE_TO_PLOT_UNIT_PROCESSED (true)
+// Fix that allow any unit moved because of block, to be further processed in other tactical moves.
+#define MOD_AUI_FIX_MOVING_BLOCKING_UNIT_NOT_PROCESSED (true)
+// Tactical AI will no longer comandeer units that are naval scouts out of armies...
+#define MOD_AUI_FIX_COMMANDEER_UNITS_SCOUTS (true)
+// Check out possible null plot before accessing its properties.
+#define MOD_AUI_FIX_BARB_SEA_MOVE_CHECK_NULL_PLOT (true)
+// Check wich is the best adyacent plot based on turns and danger on both move to target or move to two range from target.
+#define MOD_AUI_MOVE_TO_TARGET_SCORE_BY_TURNS_AND_DANGER
+// Calls the function for two range close in if the unit is ranged with more than 1 range.
+#define MOD_AI_SMART_CALL_TWO_RANGE_MOVE_TO_TARGET_RANGED
 
 // CvMilitaryAI
 //--------------
@@ -153,6 +202,8 @@
 #endif
 // Reworked function to allow to check range from the parameter (was fixed at 10 ignoring parameter)
 #define MOD_AI_SMART_NUM_ENEMY_AIR_UNITS_IN_RANGE (true)
+// Reworked how the number of units the AI will have more based on true threat and number of cities.
+#define MOD_AI_SMART_AI_ARMIES_DESIRED_CUANTITIES (true)
 
 // CvDangerPlots
 //---------------
@@ -178,6 +229,51 @@
 #define MOD_AI_SMART_ENEMY_SCORE_AT_RANGE (true)
 #endif
 
+// CvCityCitizens
+//----------------
+// Turn on production focus for settler and wonder production.
+#define MOD_CP_PRODUCTION_FOCUS_WONDER_SETTLER (true)
+
+// CvTechClasses
+//---------------
+// Also check for water and non luxury resources for the locale tech multiplier, luxuries get double value.
+#define MOD_AI_SMART_TECH_LOCALE_PRIORITY_CHECK_ALL_RESOURCES (true)
+// Tech is calculated with flavors from current needs vs grand strategy player flavor, based on this.
+// As difficulty is not taken into account, for standard speed will use a base of 500 turns even for 
+// a deity AI player. The value even out at turn 250, witch is stupid due to AI bonuses the game could
+// be near finished (if not finished) by then.
+#define MOD_AI_SMART_TECH_GAME_PROGRESS_UPDATED_WITH_DIFFICULTY (true)
+// As how tech flavor works and is calculated, it is easily zeroed specially at the beginning.
+// Zeroed values will not make further calculations with resources and player priorities...
+// So let's rescale them on a 2 to 10 range.
+#define MOD_AI_SMART_TECH_FLAVOR_MINIMUM_VALUES (true)
+// Try to boost grand strategy main flavors a bit, so late game AI is better oriented to win.
+#define MOD_AI_SMART_LEADER_FLAVOR_GS_BOOST_FOR_TECH (true)
+
+// CvTechAI
+//---------
+// When recursively propagating, use NUM_AND_TECH_PREREQS (6) instead of NUM_OR_TECH_PREREQS (3), while in 
+// practice only Agriculture uses 4 and prereqs, could have unexpected flavors with a custom tech tree.
+#define MOD_AI_SMART_TECH_FLAVOR_PROPAGATION_BUGFIX (true)
+// Divide propagation value between all propagated techs. This way some techs
+// will not get unfair values due to being requisite for more techs.
+#define MOD_AI_SMART_TECH_FLAVOR_PROPAGATION_DISTRIBUTION (true)
+// Minor adjustement to avoid further calculations if flavor value is zero.
+#define MOD_AI_SMART_OPTIMIZE_FLAVOR_WEIGHT_ROUNDTRIPS (true)
+// Adjustement to value better more expensive techs if it is free.
+#define MOD_AUI_TECHAI_CHOOSE_NEXT_TECH_FREE_TECH_WANTS_EXPENSIVE (true)
+
+// CvGrandStrategyAI
+//-------------------
+// Lowers the culture priority part that's based on era.
+#define MOD_AI_SMART_GRAND_STRATEGY_CULTURE_LESS_PRIORITY (true)
+// Rises the science priority part that's based on era, adjusts priority boost from apollo project.
+#define MOD_AI_SMART_GRAND_STRATEGY_SCIENCE_MORE_PRIORITY (true)
+// Function to boost grand strategy main flavors values a bit, using the average of leader + GS and GS Main Falvor.
+#ifdef MOD_AI_SMART_LEADER_FLAVOR_GS_BOOST_FOR_TECH
+#define MOD_AI_SMART_FUNCTION_LEADER_FLAVOR_GS_BOOST (true)
+#endif
+
 // CvDealAI
 //----------
 // AI will not propose obsolete/no value items as part of a deal
@@ -193,11 +289,6 @@
 #define MOD_CP_COUNT_RANGED_DESPITE_DOMAIN (true)
 // Start adding less strength value due to distance starting at 4 distance.
 #define MOD_CP_DISCOUNT_DISTANCE_AT_4_RANGE (true)
-
-//----------------------------
-
-// help to log what's happening
-#define MOD_AI_SMART_LOGS                           (true)
 
 #endif
 

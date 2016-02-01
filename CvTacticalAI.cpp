@@ -361,7 +361,11 @@ void CvTacticalAI::CommandeerUnits()
 	for(pLoopUnit = m_pPlayer->firstUnit(&iLoop); pLoopUnit; pLoopUnit = m_pPlayer->nextUnit(&iLoop))
 	{
 		// Never want immobile/dead units, explorers, ones that have already moved or automated human units
+#if defined(MOD_AUI_FIX_COMMANDEER_UNITS_SCOUTS)
+		if (pLoopUnit->TurnProcessed() || pLoopUnit->isDelayedDeath() || pLoopUnit->AI_getUnitAIType() == UNITAI_UNKNOWN || ((pLoopUnit->AI_getUnitAIType() == UNITAI_EXPLORE || pLoopUnit->AI_getUnitAIType() == UNITAI_EXPLORE_SEA) && pLoopUnit->getArmyID() == FFreeList::INVALID_INDEX) || !pLoopUnit->canMove() || pLoopUnit->isHuman())
+#else
 		if(pLoopUnit->TurnProcessed() || pLoopUnit->isDelayedDeath() || pLoopUnit->AI_getUnitAIType() == UNITAI_UNKNOWN ||  pLoopUnit->AI_getUnitAIType() == UNITAI_EXPLORE || !pLoopUnit->canMove() || pLoopUnit->isHuman())
+#endif
 		{
 			continue;
 		}
@@ -1714,284 +1718,144 @@ void CvTacticalAI::AssignTacticalMove(CvTacticalMove move)
 
 	if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_MOVE_NONCOMBATANTS_TO_SAFETY])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotMovesToSafety to civilians with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotMovesToSafety(false /*bCombatUnits*/);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_CAPTURE_CITY])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotCaptureCityMoves with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotCaptureCityMoves();
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_DAMAGE_CITY])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotDamageCityMoves with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotDamageCityMoves();
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_DESTROY_HIGH_UNIT])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotDestroyUnitMoves High with %d priority, must kill", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotDestroyUnitMoves(AI_TACTICAL_TARGET_HIGH_PRIORITY_UNIT, true);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_DESTROY_MEDIUM_UNIT])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotDestroyUnitMoves Medium with %d priority, must kill", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotDestroyUnitMoves(AI_TACTICAL_TARGET_MEDIUM_PRIORITY_UNIT, true);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_DESTROY_LOW_UNIT])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotDestroyUnitMoves Low with %d priority, must kill", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotDestroyUnitMoves(AI_TACTICAL_TARGET_LOW_PRIORITY_UNIT, true);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_TO_SAFETY])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotMovesToSafety to combat units with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotMovesToSafety(true /*bCombatUnits*/);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_ATTRIT_HIGH_UNIT])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotDestroyUnitMoves High with %d priority, only damage", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotDestroyUnitMoves(AI_TACTICAL_TARGET_HIGH_PRIORITY_UNIT, false);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_ATTRIT_MEDIUM_UNIT])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotDestroyUnitMoves Medium with %d priority, only damage", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotDestroyUnitMoves(AI_TACTICAL_TARGET_MEDIUM_PRIORITY_UNIT, false);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_ATTRIT_LOW_UNIT])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotDestroyUnitMoves Low with %d priority, only damage", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotDestroyUnitMoves(AI_TACTICAL_TARGET_LOW_PRIORITY_UNIT, false);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_REPOSITION])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotRepositionMoves with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotRepositionMoves();
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_BARBARIAN_CAMP])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotBarbarianCampMoves with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotBarbarianCampMoves();
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_PILLAGE_CITADEL])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotPillageMoves to citadels with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotPillageMoves(AI_TACTICAL_TARGET_CITADEL, true /*bFirstPass*/);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_PILLAGE_RESOURCE])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotPillageMoves to resource improvements with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotPillageMoves(AI_TACTICAL_TARGET_IMPROVEMENT_RESOURCE, true /*bFirstPass*/);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_PILLAGE])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotPillageMoves to normal improvement with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotPillageMoves(AI_TACTICAL_TARGET_IMPROVEMENT, true /*bFirstPass*/);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_PILLAGE_CITADEL_NEXT_TURN])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotPillageMoves to citadels with %d priority, second pass", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotPillageMoves(AI_TACTICAL_TARGET_CITADEL, false /*bFirstPass*/);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_PILLAGE_RESOURCE_NEXT_TURN])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotPillageMoves to resource improvements with %d priority, second pass", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotPillageMoves(AI_TACTICAL_TARGET_IMPROVEMENT_RESOURCE, false /*bFirstPass*/);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_PILLAGE_NEXT_TURN])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotPillageMoves to normal improvements with %d priority, second pass", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotPillageMoves(AI_TACTICAL_TARGET_IMPROVEMENT, false /*bFirstPass*/);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_PLUNDER_TRADE_UNIT])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotPlunderTradeUnitMoves with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotPlunderTradeUnitMoves(DOMAIN_LAND);
 		PlotPlunderTradeUnitMoves(DOMAIN_SEA);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_PARK_ON_TRADE_ROUTE])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotPlunderTradePlotMoves with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotPlunderTradePlotMoves(DOMAIN_LAND);
 		PlotPlunderTradePlotMoves(DOMAIN_SEA);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_ATTACK_VERY_HIGH_PRIORITY_CIVILIAN])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotCivilianAttackMoves very high with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotCivilianAttackMoves(AI_TACTICAL_TARGET_VERY_HIGH_PRIORITY_CIVILIAN);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_ATTACK_HIGH_PRIORITY_CIVILIAN])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotCivilianAttackMoves high with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotCivilianAttackMoves(AI_TACTICAL_TARGET_HIGH_PRIORITY_CIVILIAN);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_ATTACK_MEDIUM_PRIORITY_CIVILIAN])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotCivilianAttackMoves medium with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotCivilianAttackMoves(AI_TACTICAL_TARGET_MEDIUM_PRIORITY_CIVILIAN);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_ATTACK_LOW_PRIORITY_CIVILIAN])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotCivilianAttackMoves low with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotCivilianAttackMoves(AI_TACTICAL_TARGET_LOW_PRIORITY_CIVILIAN);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_SAFE_BOMBARDS])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotSafeBombardMoves with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotSafeBombardMoves();
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_HEAL])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotHealMoves with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotHealMoves();
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_ANCIENT_RUINS])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotAncientRuinMoves 1 turns away with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotAncientRuinMoves(1);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_GARRISON_TO_ALLOW_BOMBARD])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotGarrisonMoves 1 turns away with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotGarrisonMoves(1, true /*bMustAllowRangedAttack*/);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_GARRISON_ALREADY_THERE])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotGarrisonMoves 0 turns away with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotGarrisonMoves(0);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_BASTION_ALREADY_THERE])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotBastionMoves 0 turns away with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotBastionMoves(0);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_GUARD_IMPROVEMENT_ALREADY_THERE])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotGuardImprovementMoves 0 turns away with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotGuardImprovementMoves(0);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_GARRISON_1_TURN])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotGarrisonMoves 1 turns away with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotGarrisonMoves(1);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_BASTION_1_TURN])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotBastionMoves 1 turns away with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotBastionMoves(1);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_GUARD_IMPROVEMENT_1_TURN])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotGuardImprovementMoves 1 turns away with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotGuardImprovementMoves(1);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_AIR_INTERCEPT])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotAirInterceptMoves with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotAirInterceptMoves();
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_AIR_SWEEP])
@@ -2004,114 +1868,58 @@ void CvTacticalAI::AssignTacticalMove(CvTacticalMove move)
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_POSTURE_SIT_AND_BOMBARD])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotSitAndBombardMoves with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotSitAndBombardMoves();
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_POSTURE_ATTRIT_FROM_RANGE])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotAttritFromRangeMoves with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotAttritFromRangeMoves();
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_POSTURE_EXPLOIT_FLANKS])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotExploitFlanksMoves with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotExploitFlanksMoves();
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_POSTURE_STEAMROLL])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotSteamrollMoves with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotSteamrollMoves();
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_POSTURE_SURGICAL_CITY_STRIKE])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotSurgicalCityStrikeMoves with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotSurgicalCityStrikeMoves();
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_POSTURE_HEDGEHOG])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotHedgehogMoves with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotHedgehogMoves();
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_POSTURE_COUNTERATTACK])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotCounterattackMoves with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotCounterattackMoves();
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_POSTURE_WITHDRAW])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotWithdrawMoves with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotWithdrawMoves();
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_POSTURE_SHORE_BOMBARDMENT])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotShoreBombardmentMoves with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotShoreBombardmentMoves();
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_CLOSE_ON_TARGET])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotCloseOnTarget with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotCloseOnTarget(true /*bCheckDominance*/);
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_MOVE_OPERATIONS])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotOperationalArmyMoves with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotOperationalArmyMoves();
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_EMERGENCY_PURCHASES])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotEmergencyPurchases with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotEmergencyPurchases();
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_DEFENSIVE_AIRLIFT])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotDefensiveAirlifts with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotDefensiveAirlifts();
 	}
 	else if(move.m_eMoveType == (TacticalAIMoveTypes)m_CachedInfoTypes[eTACTICAL_ESCORT_EMBARKED_UNIT])
 	{
-#if defined(MOD_AI_SMART_LOGS)
-		tacticalLogString.Format("Check PlotEscortEmbarkedMoves with %d priority", move.m_iPriority);
-		LogTacticalMessage(tacticalLogString);
-#endif
 		PlotEscortEmbarkedMoves();
 	}
 }
@@ -6775,10 +6583,6 @@ void CvTacticalAI::ExecuteAttack(CvTacticalTarget* pTarget, CvPlot* pTargetPlot,
 /// Execute moving units to a better location
 void CvTacticalAI::ExecuteRepositionMoves()
 {
-#if defined(MOD_AI_SMART_LOGS)
-	tacticalLogString.Format("Check ExecuteRepositionMoves with d% units", m_CurrentMoveUnits.size());
-	LogTacticalMessage(tacticalLogString);
-#endif
 
 	CvPlot* pBestPlot = NULL;
 	CvString strTemp;
@@ -7520,6 +7324,9 @@ void CvTacticalAI::ExecuteMoveToPlot(UnitHandle pUnit, CvPlot* pTarget, bool bSa
 		}
 	}
 
+#if defined(MOD_AUI_FIX_EXECUTE_MOVE_TO_PLOT_UNIT_PROCESSED)
+	if (!bSaveMoves)
+#endif
 	UnitProcessed(pUnit->GetID(), pUnit->IsCombatUnit());
 }
 
@@ -7547,7 +7354,11 @@ bool CvTacticalAI::ExecuteMoveOfBlockingUnit(UnitHandle pBlockingUnit)
 			// Has to be somewhere we can move and be empty of other units/enemy cities
 			if(!pPlot->getVisibleEnemyDefender(m_pPlayer->GetID()) && !pPlot->isEnemyCity(*pBlockingUnit.pointer()) && pBlockingUnit->GeneratePath(pPlot))
 			{
+#if defined (MOD_AUI_FIX_MOVING_BLOCKING_UNIT_NOT_PROCESSED)
+				ExecuteMoveToPlot(pBlockingUnit, pPlot, true);
+#else
 				ExecuteMoveToPlot(pBlockingUnit, pPlot);
+#endif
 				if(GC.getLogging() && GC.getAILogging())
 				{
 					CvString strTemp, strLogString;
@@ -7688,7 +7499,12 @@ bool CvTacticalAI::ExecuteSafeBombards(CvTacticalTarget& kTarget)
 
 	// Get required damage on unit target
 	pDefender = pTargetPlot->getVisibleEnemyDefender(m_pPlayer->GetID());
+#if defined(MOD_AUI_FIX_SAFE_BOMBARDS_CITIES_WITH_GARRISON)
+	CvCity* pCity = pTargetPlot->getPlotCity();
+	if (pDefender && !pCity)
+#else
 	if(pDefender)
+#endif
 	{
 		iRequiredDamage = pDefender->GetCurrHitPoints();
 
@@ -7720,7 +7536,9 @@ bool CvTacticalAI::ExecuteSafeBombards(CvTacticalTarget& kTarget)
 	// Get required damage on city target
 	else
 	{
+#if !defined(MOD_AUI_FIX_SAFE_BOMBARDS_CITIES_WITH_GARRISON)
 		CvCity* pCity = pTargetPlot->getPlotCity();
+#endif
 		if(pCity != NULL)
 		{
 			iRequiredDamage = pCity->GetMaxHitPoints() - pCity->getDamage();
@@ -8102,7 +7920,9 @@ bool CvTacticalAI::ExecuteOneProtectedBombard(CvTacticalTarget& kTarget)
 					}
 				}
 
+#if !defined(MOD_AUI_FIX_SAFE_BOMBARDS_MOVE_AND_SHOOT)
 				UnitProcessed(iAttackingUnitID);
+#endif
 
 				if(pUnit->canSetUpForRangedAttack(NULL))
 				{
@@ -8130,6 +7950,9 @@ bool CvTacticalAI::ExecuteOneProtectedBombard(CvTacticalTarget& kTarget)
 						pFirstAttacker = pUnit;
 					}
 				}
+#if defined(MOD_AUI_FIX_SAFE_BOMBARDS_MOVE_AND_SHOOT)
+				UnitProcessed(iAttackingUnitID);
+#endif
 			}
 		}
 
@@ -8423,7 +8246,18 @@ void CvTacticalAI::ExecuteCloseOnTarget(CvTacticalTarget& kTarget, CvTacticalDom
 
 					if(pUnit->IsCanAttackRanged())
 					{
+#if defined(MOD_AUI_CLOSE_ON_TARGET_MELEE_RANGE)
+						if (pUnit->GetRange() > 1)
+						{
+							unit.SetPosition((MultiunitPositionTypes)m_CachedInfoTypes[eMUPOSITION_BOMBARD]);
+						}
+						else
+						{
+							unit.SetPosition((MultiunitPositionTypes)m_CachedInfoTypes[eMUPOSITION_FRONT_LINE]);
+						}
+#else
 						unit.SetPosition((MultiunitPositionTypes)m_CachedInfoTypes[eMUPOSITION_BOMBARD]);
+#endif
 						iRangedUnits++;
 						m_OperationUnits.push_back(unit);
 
@@ -9687,6 +9521,20 @@ bool CvTacticalAI::IsExpectedToDamageWithRangedAttack(UnitHandle pAttacker, CvPl
 /// Move up to our target avoiding our own units if possible
 bool CvTacticalAI::MoveToEmptySpaceNearTarget(UnitHandle pUnit, CvPlot* pTarget, bool bLand)
 {
+#if defined(MOD_AI_SMART_CALL_TWO_RANGE_MOVE_TO_TARGET_RANGED)
+	if (pUnit->IsCanAttackRanged() && (pUnit->GetRange() > 1))
+	{
+		return MoveToEmptySpaceTwoFromTarget(pUnit, pTarget, bLand);
+	}
+#endif
+#if defined(MOD_AUI_MOVE_TO_TARGET_SCORE_BY_TURNS_AND_DANGER)
+	if (plotDistance(pUnit->getX(), pUnit->getY(), pTarget->getX(), pTarget->getY()) == 1 && pUnit->plot()->isWater() != bLand)
+	{
+		return true;
+	}
+	CvWeightedVector<CvPlot*> pPossiblePlots;
+	int iTurnsNeeded;
+#endif
 	CvPlot* pLoopPlot;
 
 	// Look at spaces adjacent to target
@@ -9704,6 +9552,13 @@ bool CvTacticalAI::MoveToEmptySpaceNearTarget(UnitHandle pUnit, CvPlot* pTarget,
 					// And if it is a city, make sure we are friends with them, else we will automatically attack
 					if(pLoopPlot->getPlotCity() == NULL || pLoopPlot->isFriendlyCity(*pUnit, false))
 					{
+#if defined(MOD_AUI_MOVE_TO_TARGET_SCORE_BY_TURNS_AND_DANGER)
+						iTurnsNeeded = MAX_INT;
+						if (pUnit->GeneratePath(pLoopPlot, MOVE_UNITS_IGNORE_DANGER, false, &iTurnsNeeded))
+						{
+							// Go ahead with mission
+							pPossiblePlots.push_back(pLoopPlot, iTurnsNeeded);
+#else
 						// Find a path to this space
 						if(pUnit->GeneratePath(pLoopPlot))
 						{
@@ -9711,18 +9566,52 @@ bool CvTacticalAI::MoveToEmptySpaceNearTarget(UnitHandle pUnit, CvPlot* pTarget,
 							bool bMoveWasSafe;
 							MoveToUsingSafeEmbark(pUnit, pLoopPlot, bMoveWasSafe);
 							return true;
+#endif
 						}
 					}
 				}
 			}
 		}
 	}
+#if defined(MOD_AUI_MOVE_TO_TARGET_SCORE_BY_TURNS_AND_DANGER)
+	if (pPossiblePlots.size() > 0)
+	{
+		iTurnsNeeded = pPossiblePlots.GetWeight(0);
+		pPossiblePlots.SortItems();
+		pLoopPlot = pPossiblePlots.GetElement(0);
+		for (int iI = 1; iI < pPossiblePlots.size(); iI++)
+		{
+			if (pPossiblePlots.GetWeight(iI) == iTurnsNeeded)
+			{
+				if (m_pPlayer->GetPlotDanger(*pLoopPlot) > m_pPlayer->GetPlotDanger(*pPossiblePlots.GetElement(iI)))
+				{
+					pLoopPlot = pPossiblePlots.GetElement(iI);
+				}
+			}
+			else
+				break;
+		}
+
+		// Go ahead with mission
+		bool bMoveWasSafe;
+		MoveToUsingSafeEmbark(pUnit, pLoopPlot, bMoveWasSafe);
+		return true;
+	}
+#endif
 	return false;
 }
 
 /// Move up to our target (this time within 2 spaces) avoiding our own units if possible
 bool CvTacticalAI::MoveToEmptySpaceTwoFromTarget(UnitHandle pUnit, CvPlot* pTarget, bool bLand)
 {
+#if defined(MOD_AUI_MOVE_TO_TARGET_SCORE_BY_TURNS_AND_DANGER)
+	if (plotDistance(pUnit->getX(), pUnit->getY(), pTarget->getX(), pTarget->getY()) == 2 && pUnit->plot()->isWater() != bLand)
+	{
+		return true;
+	}
+	CvWeightedVector<CvPlot*> pPossiblePlots;
+	int iTurnsNeeded;
+#endif
 	CvPlot* pLoopPlot;
 
 	// Look at spaces adjacent to target
@@ -9740,6 +9629,13 @@ bool CvTacticalAI::MoveToEmptySpaceTwoFromTarget(UnitHandle pUnit, CvPlot* pTarg
 					// And if it is a city, make sure we are friends with them, else we will automatically attack
 					if(pLoopPlot->getPlotCity() == NULL || pLoopPlot->isFriendlyCity(*pUnit, false))
 					{
+#if defined(MOD_AUI_MOVE_TO_TARGET_SCORE_BY_TURNS_AND_DANGER)
+						iTurnsNeeded = MAX_INT;
+						if (pUnit->GeneratePath(pLoopPlot, MOVE_UNITS_IGNORE_DANGER, false, &iTurnsNeeded))
+						{
+							// Go ahead with mission
+							pPossiblePlots.push_back(pLoopPlot, iTurnsNeeded);
+#else
 						// Find a path to this space
 						if(pUnit->GeneratePath(pLoopPlot))
 						{
@@ -9747,12 +9643,38 @@ bool CvTacticalAI::MoveToEmptySpaceTwoFromTarget(UnitHandle pUnit, CvPlot* pTarg
 							bool bMoveWasSafe;
 							MoveToUsingSafeEmbark(pUnit, pLoopPlot, bMoveWasSafe);
 							return true;
+#endif
 						}
 					}
 				}
 			}
 		}
 	}
+#if defined(MOD_AUI_MOVE_TO_TARGET_SCORE_BY_TURNS_AND_DANGER)
+	if (pPossiblePlots.size() > 0)
+	{
+		iTurnsNeeded = pPossiblePlots.GetWeight(0);
+		pPossiblePlots.SortItems();
+		pLoopPlot = pPossiblePlots.GetElement(0);
+		for (int iI = 1; iI < pPossiblePlots.size(); iI++)
+		{
+			if (pPossiblePlots.GetWeight(iI) == iTurnsNeeded)
+			{
+				if (m_pPlayer->GetPlotDanger(*pLoopPlot) > m_pPlayer->GetPlotDanger(*pPossiblePlots.GetElement(iI)))
+				{
+					pLoopPlot = pPossiblePlots.GetElement(iI);
+				}
+			}
+			else
+				break;
+		}
+
+		// Go ahead with mission
+		bool bMoveWasSafe;
+		MoveToUsingSafeEmbark(pUnit, pLoopPlot, bMoveWasSafe);
+		return true;
+	}
+#endif
 	return false;
 }
 
@@ -9793,7 +9715,11 @@ bool CvTacticalAI::MoveToUsingSafeEmbark(UnitHandle pUnit, CvPlot* pTargetPlot, 
 		{
 			bool bDangerous = false;
 
+#if defined(MOD_AUI_FIX_MOVE_TO_USING_SAFE_EMBARK_CORRECT_PLOT)
+			int iPlotIndex = GC.getMap().plotNum(pMovePlot->getX(), pMovePlot->getY());
+#else
 			int iPlotIndex = GC.getMap().plotNum(pTargetPlot->getX(), pTargetPlot->getY());
+#endif
 			CvTacticalAnalysisCell *pCell = m_pMap->GetCell(iPlotIndex);
 			if (pCell->IsSubjectToAttack())
 			{
@@ -9803,7 +9729,11 @@ bool CvTacticalAI::MoveToUsingSafeEmbark(UnitHandle pUnit, CvPlot* pTargetPlot, 
 
 			else
 			{
+#if defined(MOD_AUI_FIX_MOVE_TO_USING_SAFE_EMBARK_CORRECT_PLOT)
+				if (GC.getGame().GetTacticalAnalysisMap()->IsInEnemyDominatedZone(pMovePlot))
+#else
 				if (GC.getGame().GetTacticalAnalysisMap()->IsInEnemyDominatedZone(pTargetPlot))
+#endif
 				{
 					// Also dangerous in an enemy dominated naval zone
 					bDangerous = true;
@@ -9913,7 +9843,11 @@ CvPlot* CvTacticalAI::FindBestBarbarianSeaMove(UnitHandle pUnit)
 		if(plotDistance(pUnit->getX(), pUnit->getY(), pTarget->GetTargetX(), pTarget->GetTargetY()) < m_iSeaBarbarianRange)
 		{
 			pPlot = GC.getMap().plot(pTarget->GetTargetX(), pTarget->GetTargetY());
+#if defined (MOD_AUI_FIX_BARB_SEA_MOVE_CHECK_NULL_PLOT)
+			if(pPlot && pUnit->getArea() == pPlot->getArea())
+#else
 			if(pUnit->getArea() == pPlot->getArea())
+#endif
 			{
 				iValue = TurnsToReachTarget(pUnit, pPlot, true /*bReusePaths*/);
 				if(iValue < iBestValue)

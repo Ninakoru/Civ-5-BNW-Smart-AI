@@ -628,18 +628,12 @@ void CvDangerPlots::AssignUnitDangerValue(CvUnit* pUnit, CvPlot* pPlot)
 				if( pDistance <= pUnit->GetRange() && pUnit->canRangeStrikeAt(pPlot->getX(),pPlot->getY()))
 				{
 					iTurnsAway = 1;
-					CvString strMsg;
 				}
 				else if(pDistance < pUnit->GetRangePlusMoveToshot())
 				{
-					// Lest check if unit can move and strike from a number of positions.
-					std::vector<CvPlot*> movePlotList;
-					pUnit -> GetMovablePlotListOpt(movePlotList, pPlot, false);
-					if (!movePlotList.empty())
+					if (kPathFinder.GeneratePath(pUnit->getX(), pUnit->getY(), iPlotX, iPlotY, 0, true /*bReuse*/))
 					{
-						// Just give half danger if only one position found, else full danger.
-						int moveProb = 3 - movePlotList.size();
-						iTurnsAway = max(1, moveProb);
+						iTurnsAway = 2;
 					}
 				}
 				if (iTurnsAway == 0)

@@ -2128,8 +2128,15 @@ void CvMilitaryAI::UpdateBaseData()
 	int iFlavorOffense = m_pPlayer->GetGrandStrategyAI()->GetPersonalityAndGrandStrategy((FlavorTypes)GC.getInfoTypeForString("FLAVOR_OFFENSE"));
 	int iFlavorDefense = m_pPlayer->GetGrandStrategyAI()->GetPersonalityAndGrandStrategy((FlavorTypes)GC.getInfoTypeForString("FLAVOR_DEFENSE"));
 
+#if defined(MOD_AI_SMART_AI_ARMIES_DESIRED_CUANTITIES)
+	// This value will be between 10 and 100 based on highest threat without Xml values altered.
+	int threatBase = GetThreatWeight(m_pPlayer->GetMilitaryAI()->GetHighestThreat()) * 10;
+	// Result value will be really between 0.5 and 1.5 this time!
+	fMultiplier = (float)0.40 + (((float)(threatBase + iFlavorOffense + iFlavorDefense)) / (float)100.0);
+#else
 	// Scale up or down based on true threat level and a bit by flavors (multiplier should range from about 0.5 to about 1.5)
 	fMultiplier = (float)0.40 + (((float)(m_pPlayer->GetMilitaryAI()->GetHighestThreat() + iFlavorOffense + iFlavorDefense)) / (float)100.0);
+#endif
 
 	// first get the number of defenders that we think we need
 
@@ -2140,11 +2147,18 @@ void CvMilitaryAI::UpdateBaseData()
 	iNumUnitsWanted += (int)(m_pPlayer->getNumCities() * /*1.0*/ GC.getAI_STRATEGY_DEFEND_MY_LANDS_UNITS_PER_CITY());
 	iNumUnitsWanted += m_pPlayer->GetNumUnitsWithUnitAI(UNITAI_SETTLE, true);
 
+#if defined(MOD_AI_SMART_AI_ARMIES_DESIRED_CUANTITIES)
+	int iDifficulty = 200 - GC.getGame().getHandicapInfo().getAIUnitCostPercent();
+	// Lets add the percentage difference based on unit maintenance.
+	iNumUnitsWanted = (iNumUnitsWanted * iDifficulty) / 100;
+#endif
 	m_iMandatoryReserveSize = (int)((float)iNumUnitsWanted * fMultiplier);
 
+#if !defined(MOD_AI_SMART_AI_ARMIES_DESIRED_CUANTITIES)
 	// add in a few for the difficulty level (all above Chieftain are boosted)
 	int iDifficulty = max(0,GC.getGame().getHandicapInfo().GetID() - 1);
 	m_iMandatoryReserveSize += iDifficulty;
+#endif
 
 	m_iMandatoryReserveSize = max(1,m_iMandatoryReserveSize);
 
@@ -2168,19 +2182,35 @@ void CvMilitaryAI::UpdateBaseData()
 				bConquestGrandStrategy = true;
 			}
 		}
+#if !defined(MOD_AI_SMART_AI_ARMIES_DESIRED_CUANTITIES)
 		if(bConquestGrandStrategy)
 		{
 			iNumUnitsWanted *= 2;
 		}
+#endif
 
 		// add in a few more if the player is bold
 		iNumUnitsWanted += m_pPlayer->GetDiplomacyAI()->GetBoldness();
 
+#if !defined(MOD_AI_SMART_AI_ARMIES_DESIRED_CUANTITIES)
 		// add in more if we are playing on a high difficulty
 		iNumUnitsWanted += iDifficulty;
 
 		iNumUnitsWanted = (int)((float)iNumUnitsWanted * fMultiplier);
+#endif
 
+#if defined(MOD_AI_SMART_AI_ARMIES_DESIRED_CUANTITIES)
+		iNumUnitsWanted = (iNumUnitsWanted * iDifficulty) / 125;
+
+		iNumUnitsWanted = (int)((float)iNumUnitsWanted * fMultiplier);
+
+		iNumUnitsWanted += m_iMandatoryReserveSize;
+
+		if(bConquestGrandStrategy)
+		{
+			iNumUnitsWanted = (iNumUnitsWanted * 3) / 2;
+		}
+#endif
 		iNumUnitsWanted = max(1,iNumUnitsWanted);
 	}
 
@@ -2192,7 +2222,11 @@ void CvMilitaryAI::UpdateBaseData()
 		m_iMandatoryReserveSize /= 3;
 	}
 
+#if defined(MOD_AI_SMART_AI_ARMIES_DESIRED_CUANTITIES)
+	m_iRecommendedMilitarySize = iNumUnitsWanted;
+#else
 	m_iRecommendedMilitarySize = m_iMandatoryReserveSize + iNumUnitsWanted;
+#endif
 }
 
 /// Update how we're doing on defensive units

@@ -4030,6 +4030,7 @@ bool EconomicAIHelpers::IsTestStrategy_ExpandLikeCrazy(EconomicAIStrategyTypes e
 		return false;
 	}
 
+#if !defined(MOD_AUI_FIX_EXPAND_LIKE_CRAZY_REMOVE_CULTURE_CHECK)
 	// Never run this if we are going for a cultural victory since it will derail that
 	AIGrandStrategyTypes eGrandStrategy = (AIGrandStrategyTypes) GC.getInfoTypeForString("AIGRANDSTRATEGY_CULTURE");
 	if(eGrandStrategy != NO_AIGRANDSTRATEGY)
@@ -4043,6 +4044,7 @@ bool EconomicAIHelpers::IsTestStrategy_ExpandLikeCrazy(EconomicAIStrategyTypes e
 			}
 		}
 	}
+#endif
 
 	int iFlavorExpansion = pPlayer->GetGrandStrategyAI()->GetPersonalityAndGrandStrategy((FlavorTypes)GC.getInfoTypeForString("FLAVOR_EXPANSION"));
 	CvEconomicAIStrategyXMLEntry* pStrategy = pPlayer->GetEconomicAI()->GetEconomicAIStrategies()->GetEntry(eStrategy);

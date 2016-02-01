@@ -233,6 +233,38 @@ void CvCityCitizens::DoTurn()
 
 	CvPlayerAI& thisPlayer = GET_PLAYER(GetOwner());
 
+#if defined(MOD_CP_PRODUCTION_FOCUS_WONDER_SETTLER)
+	bool bWonder = false;
+	bool bSettler = false;
+	const OrderData* pOrderNode = m_pCity->headOrderQueueNode();
+	CvUnitEntry* pkUnitInfo = NULL;
+	CvBuildingClassInfo* pkBuildingClassInfo = NULL;
+	if(pOrderNode != NULL && pOrderNode->eOrderType == ORDER_TRAIN)
+	{
+		pkUnitInfo = GC.getUnitInfo((UnitTypes)pOrderNode->iData1);
+		if(pkUnitInfo != NULL && pkUnitInfo->IsFound())
+		{
+			bSettler = true;
+		}
+	}
+	else if (pOrderNode != NULL && pOrderNode->eOrderType == ORDER_CONSTRUCT)
+	{
+		CvBuildingEntry* pkOrderBuildingInfo = GC.getBuildingInfo((BuildingTypes)pOrderNode->iData1);
+
+		if(pkOrderBuildingInfo)
+		{
+			const BuildingClassTypes eOrderBuildingClass = (BuildingClassTypes)pkOrderBuildingInfo->GetBuildingClassType();
+			if(eOrderBuildingClass != NO_BUILDINGCLASS)
+			{
+				pkBuildingClassInfo = GC.getBuildingClassInfo(eOrderBuildingClass);
+				if(pkBuildingClassInfo && pkBuildingClassInfo->getMaxGlobalInstances() == 1)
+				{
+					bWonder = true;
+				}
+			}
+		}
+	}
+#endif
 	if(m_pCity->IsPuppet())
 	{
 		SetFocusType(CITY_AI_FOCUS_TYPE_GOLD);
@@ -262,7 +294,11 @@ void CvCityCitizens::DoTurn()
 				//SetNoAutoAssignSpecialists(true);
 			}
 		}
+#if defined(MOD_CP_PRODUCTION_FOCUS_WONDER_SETTLER)
+		if(m_pCity->isCapital() && !thisPlayer.isMinorCiv() && (m_pCity->GetCityStrategyAI()->GetSpecialization() != eWonderSpecializationType) && !bWonder && !bSettler)
+#else
 		if(m_pCity->isCapital() && !thisPlayer.isMinorCiv() && m_pCity->GetCityStrategyAI()->GetSpecialization() != eWonderSpecializationType)
+#endif
 		{
 			SetFocusType(NO_CITY_AI_FOCUS_TYPE);
 			SetNoAutoAssignSpecialists(false);
@@ -274,7 +310,11 @@ void CvCityCitizens::DoTurn()
 				//SetNoAutoAssignSpecialists(true);
 			}
 		}
+#if defined(MOD_CP_PRODUCTION_FOCUS_WONDER_SETTLER)
+		else if((m_pCity->GetCityStrategyAI()->GetSpecialization() == eWonderSpecializationType) || bWonder || bSettler)
+#else
 		else if(m_pCity->GetCityStrategyAI()->GetSpecialization() == eWonderSpecializationType)
+#endif
 		{
 			SetFocusType(CITY_AI_FOCUS_TYPE_PRODUCTION);
 			SetNoAutoAssignSpecialists(false);
@@ -284,6 +324,10 @@ void CvCityCitizens::DoTurn()
 			//{
 			SetForcedAvoidGrowth(false);
 			//}
+#if defined(MOD_CP_PRODUCTION_FOCUS_WONDER_SETTLER)
+			if (!bSettler)
+			{
+#endif
 			iExcessFoodTimes100 = m_pCity->getYieldRateTimes100(YIELD_FOOD, false) - (m_pCity->foodConsumption() * 100);
 			if(iExcessFoodTimes100 < 200)
 			{
@@ -298,6 +342,9 @@ void CvCityCitizens::DoTurn()
 				//SetNoAutoAssignSpecialists(true);
 				SetForcedAvoidGrowth(false);
 			}
+#if defined(MOD_CP_PRODUCTION_FOCUS_WONDER_SETTLER)
+			}
+#endif
 		}
 		else if(m_pCity->getPopulation() < 5)  // we want a balanced growth
 		{
